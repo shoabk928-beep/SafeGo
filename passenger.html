@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaferGo — Passenger Screen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
+    h1, h2, h3, .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+    #map { height: 480px; width: 100%; border-radius: 1rem; z-index: 1; }
+    *:focus-visible { outline: 3px solid #f59e0b !important; outline-offset: 2px !important; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <img src="saferGo.jpeg" alt="SaferGo"
+          onerror="this.onerror=null; this.src='LOGO.jpeg';"
+          class="w-9 h-9 rounded-xl object-cover border" />
+        <div>
+          <span class="font-heading font-extrabold text-lg">SaferGo</span>
+          <span class="ml-2 text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Passenger Screen</span>
+        </div>
+      </div>
+
+      
+        <a href="rate-driver.html" class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-yellow-100 hover:bg-yellow-200 text-slate-900 text-xs font-bold">Rate Driver</a>
+<a href="profile.html" class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold">Profile</a>
+      
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <select id="city-select" onchange="switchCity(this.value)" class="bg-transparent focus:outline-none cursor-pointer">
+            <option value="islamabad">Islamabad</option>
+            <option value="rawalpindi">Rawalpindi</option>
+            <option value="lahore">Lahore</option>
+            <option value="karachi">Karachi</option>
+            <option value="peshawar">Peshawar</option>
+            <option value="quetta">Quetta</option>
+            <option value="multan">Multan</option>
+            <option value="faisalabad">Faisalabad</option>
+          </select>
+        </div>
+        <a href="driver.html" class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold">
+          Driver Screen →
+        </a>
+        <a href="login.html" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Left Booking Form -->
+    <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="font-heading font-bold text-lg">Book Ride (<span id="city-label" class="text-emerald-700">Islamabad</span>)</h2>
+        <span id="dist-badge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700">-- km</span>
+      </div>
+
+      <div>
+        <label for="pickup-input" class="block text-xs font-bold text-slate-600 mb-1">Pickup Point</label>
+        <input id="pickup-input" list="city-places-list" type="text" oninput="handleCustomPlaceInput()"
+          placeholder="Apni pickup location likhein..."
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 bg-white focus:border-emerald-600" />
+      </div>
+
+      <div>
+        <label for="dropoff-input" class="block text-xs font-bold text-slate-600 mb-1">Drop-off Point</label>
+        <input id="dropoff-input" list="city-places-list" type="text" oninput="handleCustomPlaceInput()"
+          placeholder="Jahan jana hai wo location likhein..."
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 bg-white focus:border-emerald-600" />
+      </div>
+
+      <datalist id="city-places-list"></datalist>
+
+      <!-- Vehicle Options -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" onclick="pickVeh('bike')" id="v-bike" class="p-3 rounded-xl border-2 border-slate-200 text-left">
+          <div class="font-bold text-sm">🏍️ Bike</div>
+          <div id="p-bike" class="text-xs font-extrabold text-slate-800 mt-0.5">Rs 160</div>
+        </button>
+        <button type="button" onclick="pickVeh('auto')" id="v-auto" class="p-3 rounded-xl border-2 border-slate-200 text-left">
+          <div class="font-bold text-sm">🛺 Auto</div>
+          <div id="p-auto" class="text-xs font-extrabold text-slate-800 mt-0.5">Rs 210</div>
+        </button>
+        <button type="button" onclick="pickVeh('car')" id="v-car" class="p-3 rounded-xl border-2 border-emerald-600 bg-emerald-50/60 text-left">
+          <div class="font-bold text-sm">🚗 Mini Car</div>
+          <div id="p-car" class="text-xs font-extrabold text-emerald-700 mt-0.5">Rs 280</div>
+        </button>
+        <button type="button" onclick="pickVeh('ac')" id="v-ac" class="p-3 rounded-xl border-2 border-slate-200 text-left">
+          <div class="font-bold text-sm">🚘 AC Car</div>
+          <div id="p-ac" class="text-xs font-extrabold text-slate-800 mt-0.5">Rs 330</div>
+        </button>
+      </div>
+
+      <!-- Total Fare Box (Passenger sees ONLY Total Amount) -->
+      <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="fare-input" class="text-xs font-bold text-slate-700">Total Amount (PKR)</label>
+          <span id="total-amount-display" class="font-heading font-extrabold text-base text-emerald-700">Rs 330</span>
+        </div>
+        <input id="fare-input" type="number" min="60" step="10" value="330" oninput="syncTotalAmountLabel()"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-heading font-bold text-base bg-white" />
+      </div>
+
+      <!-- Payment Method -->
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="setPay('Cash')" id="pay-Cash" class="py-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-xs font-bold">💵 Cash</button>
+        <button type="button" onclick="setPay('online')" id="pay-online" class="py-2 rounded-lg border border-slate-200 text-xs font-semibold">📲 Online</button>
+      </div>
+
+      <!-- Book Button -->
+      <button type="button" onclick="confirmBooking()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-sm shadow-lg">
+        Book Ride Now
+      </button>
+
+      <!-- Driver Price-Change Request Card (Shows when Driver clicks "Raise Fare") -->
+      <div id="price-change-request-box" class="hidden p-4 rounded-xl bg-yellow-50 border-2 border-yellow-400 text-xs space-y-2.5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <span class="font-heading font-extrabold text-sm text-slate-900">Driver Price Change Request</span>
+          <span class="px-2 py-0.5 rounded bg-yellow-400 text-slate-950 font-bold">New Price</span>
+        </div>
+        <p id="price-change-msg" class="text-slate-700 font-medium"></p>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button type="button" onclick="acceptDriverPriceChange()"
+            class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+            Accept New Price
+          </button>
+          <button type="button" onclick="declineDriverPriceChange()"
+            class="px-4 py-2 rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 font-bold">
+            Decline
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Ride Request / Next Screen Banner -->
+      <div id="ride-banner" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-300 text-xs space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-amber-900 text-sm" id="banner-status">Searching for Captain...</span>
+          <span class="px-2 py-0.5 rounded bg-amber-200 text-amber-900 font-bold" id="banner-id">RD-0000</span>
+        </div>
+        <div class="text-slate-700 font-medium" id="banner-detail"></div>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <a href="driver.html" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+            Open Driver Screen (Accept Ride) →
+          </a>
+          <button type="button" onclick="cancelRide()" class="px-3 py-2 rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 font-bold">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Map -->
+    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-3 shadow-sm flex flex-col">
+      <div class="flex items-center justify-between px-2 pb-2 text-xs">
+        <span class="font-bold text-emerald-700" id="map-city-title">Map: Islamabad (Google Maps)</span>
+        <span class="text-slate-500">Map par click karke bhi pin laga sakte hain</span>
+      </div>
+      <div id="map" class="flex-1 min-h-[480px]"></div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    const CITIES = {
+      islamabad: { name: 'Islamabad', center: [33.7077, 73.0501], zoom: 13, places: [['F-7 Markaz', [33.7215, 73.0565]], ['Faisal Mosque', [33.7295, 73.0372]], ['Centaurus Mall', [33.7077, 73.0501]], ['Blue Area', [33.7104, 73.0605]], ['Zero Point', [33.6938, 73.0652]]] },
+      rawalpindi: { name: 'Rawalpindi', center: [33.6007, 73.0679], zoom: 13, places: [['Saddar Bazaar', [33.5973, 73.0515]], ['Commercial Market', [33.6362, 73.0715]], ['Faizabad', [33.6626, 73.0825]], ['Bahria Town Ph 7', [33.5245, 73.0958]]] },
+      lahore: { name: 'Lahore', center: [31.5204, 74.3587], zoom: 12, places: [['Liberty Market', [31.5102, 74.3441]], ['Packages Mall', [31.4716, 74.3547]], ['Badshahi Mosque', [31.5880, 74.3095]], ['DHA Phase 5', [31.4675, 74.4068]]] },
+      karachi: { name: 'Karachi', center: [24.8607, 67.0011], zoom: 12, places: [['Clifton Block 4', [24.8055, 67.0304]], ['Saddar', [24.8615, 67.0268]], ['Gulshan-e-Iqbal', [24.9180, 67.0971]], ['Jinnah Airport', [24.9065, 67.1608]]] },
+      peshawar: { name: 'Peshawar', center: [34.0151, 71.5249], zoom: 13, places: [['Saddar Road', [34.0044, 71.5453]], ['University Town', [34.0021, 71.4847]], ['Hayatabad Ph 3', [33.9781, 71.4419]]] },
+      quetta: { name: 'Quetta', center: [30.1798, 66.9750], zoom: 13, places: [['Jinnah Road', [30.1912, 67.0112]], ['Zarghoon Road', [30.1846, 67.0189]], ['Sariab Road', [30.1452, 66.9942]]] },
+      multan: { name: 'Multan', center: [30.1575, 71.5249], zoom: 13, places: [['Multan Cantt', [30.1932, 71.4468]], ['Bosan Road', [30.2582, 71.5153]], ['Ghanta Ghar', [30.1978, 71.4712]]] },
+      faisalabad: { name: 'Faisalabad', center: [31.4504, 73.1350], zoom: 13, places: [['Clock Tower', [31.4187, 73.0791]], ['D-Ground', [31.4119, 73.1086]], ['Canal Road', [31.4256, 73.1235]]] }
+    };
+
+    const session = JSON.parse(localStorage.getItem('safergo_session') || '{"name":"Usman Tariq","city":"islamabad"}');
+    let curCity = session.city || 'islamabad';
+    let veh = 'car';
+    let pay = 'Cash';
+    let map, pMarker, dMarker, line;
+    let customPickupCoords = null;
+    let customDropoffCoords = null;
+    let clickToggle = 'dropoff';
+
+    // Custom colored pin icons
+    const pickupIcon = L.divIcon({
+      className: 'custom-pin-pickup',
+      html: '<div style="background:#059669;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 3px 6px rgba(0,0,0,0.35);">🟢</div>',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -15]
+    });
+
+    const dropoffIcon = L.divIcon({
+      className: 'custom-pin-dropoff',
+      html: '<div style="background:#e11d48;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 3px 6px rgba(0,0,0,0.35);">🏁</div>',
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+      popupAnchor: [0, -15]
+    });
+
+    function init() {
+      if (typeof L === 'undefined') {
+        document.getElementById('map').innerHTML =
+          '<div class="h-full flex items-center justify-center p-6 text-center text-sm text-rose-700 bg-rose-50 rounded-xl border border-rose-200">' +
+          'Map library load nahi ho saki. Internet connection check karein ya page reload (Ctrl+F5) karein.' +
+          '</div>';
+        return;
+      }
+
+      const c = CITIES[curCity] || CITIES.islamabad;
+      map = L.map('map').setView(c.center, c.zoom);
+
+      // Google Maps Tile Layer
+      const googleRoads = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; Google Maps'
+      });
+
+      // Google Maps Hybrid Satellite Layer
+      const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; Google Maps Satellite'
+      });
+
+      // OpenStreetMap Backup Layer
+      const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      });
+
+      // If Google Maps tiles fail, fallback to OSM
+      googleRoads.on('tileerror', () => {
+        if (!map.hasLayer(osmLayer)) {
+          osmLayer.addTo(map);
+        }
+      });
+
+      // Add Google Maps layer by default
+      googleRoads.addTo(map);
+
+      // Layer switcher control (Google Maps / Satellite / OSM)
+      L.control.layers({
+        'Google Maps': googleRoads,
+        'Google Satellite': googleSat,
+        'OpenStreetMap': osmLayer
+      }, null, { position: 'topright' }).addTo(map);
+
+      map.on('click', (e) => {
+        const coords = [Number(e.latlng.lat.toFixed(4)), Number(e.latlng.lng.toFixed(4))];
+        const label = `${CITIES[curCity].name} Pin (${coords[0]}, ${coords[1]})`;
+        if (clickToggle === 'pickup') {
+          customPickupCoords = coords;
+          document.getElementById('pickup-input').value = label;
+          clickToggle = 'dropoff';
+        } else {
+          customDropoffCoords = coords;
+          document.getElementById('dropoff-input').value = label;
+          clickToggle = 'pickup';
+        }
+        recalc();
+      });
+
+      document.getElementById('city-select').value = curCity;
+      switchCity(curCity);
+      setTimeout(() => map.invalidateSize(), 300);
+      checkActiveRide();
+      setInterval(checkActiveRide, 1500);
+    }
+
+    function switchCity(key) {
+      curCity = key;
+      customPickupCoords = null;
+      customDropoffCoords = null;
+      session.city = key;
+      localStorage.setItem('safergo_session', JSON.stringify(session));
+
+      const c = CITIES[key] || CITIES.islamabad;
+      document.getElementById('city-label').textContent = c.name;
+      document.getElementById('map-city-title').textContent = `Map: ${c.name} (Google Maps)`;
+
+      document.getElementById('city-places-list').innerHTML = c.places.map(p => `<option value="${p[0]}"></option>`).join('');
+      document.getElementById('pickup-input').value = c.places[0][0];
+      document.getElementById('dropoff-input').value = (c.places[1] || c.places[0])[0];
+
+      if (map) {
+        map.setView(c.center, c.zoom);
+        setTimeout(() => map.invalidateSize(), 150);
+      }
+      recalc();
+    }
+
+    function handleCustomPlaceInput() {
+      const c = CITIES[curCity] || CITIES.islamabad;
+      const pVal = document.getElementById('pickup-input').value.trim();
+      const dVal = document.getElementById('dropoff-input').value.trim();
+      const pMatch = c.places.find(p => p[0].toLowerCase() === pVal.toLowerCase());
+      const dMatch = c.places.find(p => p[0].toLowerCase() === dVal.toLowerCase());
+      customPickupCoords = pMatch ? pMatch[1] : [c.center[0] + 0.012, c.center[1] - 0.008];
+      customDropoffCoords = dMatch ? dMatch[1] : [c.center[0] - 0.014, c.center[1] + 0.012];
+      recalc();
+    }
+
+    function pickVeh(v) {
+      veh = v;
+      ['bike', 'auto', 'car', 'ac'].forEach(k => {
+        document.getElementById(`v-${k}`).className = k === v
+          ? 'p-3 rounded-xl border-2 border-emerald-600 bg-emerald-50/60 text-left'
+          : 'p-3 rounded-xl border-2 border-slate-200 text-left';
+      });
+      recalc();
+    }
+
+    function setPay(m) {
+      pay = m;
+      ['Cash', 'online'].forEach(x => {
+        const el = document.getElementById(`pay-${x}`);
+        if (el) {
+          el.className = x === m
+            ? 'py-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-xs font-bold'
+            : 'py-2 rounded-lg border border-slate-200 text-xs font-semibold';
+        }
+      });
+    }
+
+    function getCoords(inputVal, fallbackCoords, cityPlaces) {
+      const match = cityPlaces.find(p => p[0].toLowerCase() === inputVal.trim().toLowerCase());
+      if (match) return match[1];
+      return fallbackCoords;
+    }
+
+    function syncTotalAmountLabel() {
+      const amt = parseInt(document.getElementById('fare-input').value, 10) || 0;
+      document.getElementById('total-amount-display').textContent = `Rs ${amt.toLocaleString()}`;
+    }
+
+    function recalc() {
+      if (!map) return;
+      const c = CITIES[curCity] || CITIES.islamabad;
+      const pText = document.getElementById('pickup-input').value || c.places[0][0];
+      const dText = document.getElementById('dropoff-input').value || (c.places[1] || c.places[0])[0];
+
+      const pCoords = getCoords(pText, customPickupCoords || [c.center[0] + 0.01, c.center[1] - 0.01], c.places);
+      const dCoords = getCoords(dText, customDropoffCoords || [c.center[0] - 0.01, c.center[1] + 0.01], c.places);
+
+      const km = Math.max(1.5, Number((Math.hypot(pCoords[0] - dCoords[0], pCoords[1] - dCoords[1]) * 111 * 1.2).toFixed(1)));
+      document.getElementById('dist-badge').textContent = `${km} km`;
+
+      ['bike', 'auto', 'car', 'ac'].forEach(k => {
+        const rate = { bike: 1.2, auto: 1.8, car: 2.8, ac: 3.6 }[k];
+        const price = Math.round((80 + km * 25 * rate) / 10) * 10;
+        document.getElementById(`p-${k}`).textContent = `Rs ${price}`;
+        if (k === veh) {
+          document.getElementById('fare-input').value = price;
+          syncTotalAmountLabel();
+        }
+      });
+
+      if (pMarker) map.removeLayer(pMarker);
+      if (dMarker) map.removeLayer(dMarker);
+      if (line) map.removeLayer(line);
+
+      pMarker = L.marker(pCoords, { icon: pickupIcon }).addTo(map).bindPopup(`<b>Pickup:</b> ${pText}`);
+      dMarker = L.marker(dCoords, { icon: dropoffIcon }).addTo(map).bindPopup(`<b>Drop-off:</b> ${dText}`);
+      line = L.polyline([pCoords, dCoords], { color: '#059669', weight: 4, dashArray: '6,6' }).addTo(map);
+      
+      try {
+        map.fitBounds(line.getBounds(), { padding: [50, 50], maxZoom: 15 });
+      } catch (err) {}
+    }
+
+    function confirmBooking() {
+      const p = document.getElementById('pickup-input').value.trim();
+      const d = document.getElementById('dropoff-input').value.trim();
+      const fare = parseInt(document.getElementById('fare-input').value, 10) || 300;
+
+      if (!p || !d) {
+        document.getElementById('fare-input').focus();
+        return;
+      }
+
+      const activeRide = {
+        id: 'RD-' + Math.floor(9100 + Math.random() * 800),
+        city: (CITIES[curCity] || CITIES.islamabad).name,
+        passenger: session.name || 'Passenger',
+        pickup: p,
+        dropoff: d,
+        fare,
+        pendingFare: null,
+        priceChangeStatus: 'none',
+        payment: pay,
+        status: 'searching'
+      };
+      localStorage.setItem('safergo_active_ride', JSON.stringify(activeRide));
+      checkActiveRide();
+    }
+
+    function acceptDriverPriceChange() {
+      const raw = localStorage.getItem('safergo_active_ride');
+      if (!raw) return;
+      const r = JSON.parse(raw);
+      if (r.pendingFare) {
+        r.fare = r.pendingFare;
+        r.pendingFare = null;
+        r.priceChangeStatus = 'accepted';
+        localStorage.setItem('safergo_active_ride', JSON.stringify(r));
+        document.getElementById('fare-input').value = r.fare;
+        syncTotalAmountLabel();
+        checkActiveRide();
+      }
+    }
+
+    function declineDriverPriceChange() {
+      const raw = localStorage.getItem('safergo_active_ride');
+      if (!raw) return;
+      const r = JSON.parse(raw);
+      r.pendingFare = null;
+      r.priceChangeStatus = 'declined';
+      localStorage.setItem('safergo_active_ride', JSON.stringify(r));
+      checkActiveRide();
+    }
+
+    function cancelRide() {
+      localStorage.removeItem('safergo_active_ride');
+      checkActiveRide();
+    }
+
+    function checkActiveRide() {
+      const raw = localStorage.getItem('safergo_active_ride');
+      const banner = document.getElementById('ride-banner');
+      const changeBox = document.getElementById('price-change-request-box');
+
+      if (!raw) {
+        banner.classList.add('hidden');
+        changeBox.classList.add('hidden');
+        return;
+      }
+
+      const r = JSON.parse(raw);
+      banner.classList.remove('hidden');
+      document.getElementById('banner-id').textContent = r.id;
+      document.getElementById('banner-status').textContent = `Ride Status: ${r.status.toUpperCase()} (${r.city})`;
+      document.getElementById('banner-detail').textContent = `${r.pickup} → ${r.dropoff} • Total Amount: Rs ${r.fare} (${r.payment})`;
+
+      if (r.priceChangeStatus === 'pending' && r.pendingFare) {
+        changeBox.classList.remove('hidden');
+        document.getElementById('price-change-msg').textContent =
+          `Driver ne naya fare Rs ${r.pendingFare} offer kiya hai (Mojooda Total Amount: Rs ${r.fare}). Kya aap naya price accept karte hain?`;
+      } else {
+        changeBox.classList.add('hidden');
+      }
+    }
+
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'safergo_active_ride') {
+        checkActiveRide();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

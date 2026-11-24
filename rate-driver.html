@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaferGo — Rate Your Driver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
+    h1, h2, h3, .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+    *:focus-visible { outline: 3px solid #f59e0b !important; outline-offset: 2px !important; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <img src="saferGo.jpeg" alt="SaferGo"
+          onerror="this.onerror=null; this.src='LOGO.jpeg';"
+          class="w-9 h-9 rounded-xl object-cover border" />
+        <div>
+          <span class="font-heading font-extrabold text-lg">SaferGo</span>
+          <span class="ml-2 text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">Rate Driver</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="passenger.html" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold">Passenger</a>
+        <a href="profile.html" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold">Profile</a>
+        <a href="login.html" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-2xl w-full mx-auto px-4 sm:px-6 py-8">
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+
+      <!-- Driver Info Header -->
+      <div class="flex items-center justify-between gap-4 pb-5 border-b border-slate-100">
+        <div class="flex items-center gap-3.5">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white font-heading font-extrabold text-lg flex items-center justify-center shadow">
+            KA
+          </div>
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              Trip Completed
+            </span>
+            <h1 class="font-heading font-extrabold text-xl text-slate-900 mt-1" id="driver-name">Kamran Ahmed</h1>
+            <p class="text-xs text-slate-500" id="ride-summary-text">Islamabad • Suzuki Alto (LEA-24-8821) • Total: Rs 380</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs text-slate-400 block">Current Rating</span>
+          <span class="font-heading font-extrabold text-lg text-amber-500" id="avg-rating-badge">★ 4.9</span>
+        </div>
+      </div>
+
+      <!-- Star Rating Selector -->
+      <div class="text-center space-y-2">
+        <p class="font-heading font-bold text-base text-slate-900">Apne Captain ko Star Rating Dein</p>
+        <p class="text-xs text-slate-500" id="rating-label">5 Stars — Behtareen Safar</p>
+        <div class="flex items-center justify-center gap-2 pt-1" id="stars-container" role="radiogroup" aria-label="Rate Driver 1 to 5 stars">
+          <button type="button" onclick="selectStars(1)" data-star="1" class="star-btn text-4xl text-amber-400 transition-transform hover:scale-110">★</button>
+          <button type="button" onclick="selectStars(2)" data-star="2" class="star-btn text-4xl text-amber-400 transition-transform hover:scale-110">★</button>
+          <button type="button" onclick="selectStars(3)" data-star="3" class="star-btn text-4xl text-amber-400 transition-transform hover:scale-110">★</button>
+          <button type="button" onclick="selectStars(4)" data-star="4" class="star-btn text-4xl text-amber-400 transition-transform hover:scale-110">★</button>
+          <button type="button" onclick="selectStars(5)" data-star="5" class="star-btn text-4xl text-amber-400 transition-transform hover:scale-110">★</button>
+        </div>
+      </div>
+
+      <!-- Quick Compliment Tags -->
+      <div>
+        <span class="block text-xs font-bold uppercase text-slate-600 mb-2">Quick Feedback Tags</span>
+        <div class="flex flex-wrap gap-2" id="tags-container">
+          <button type="button" onclick="toggleTag(this)" class="tag-btn px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+            Polite Captain
+          </button>
+          <button type="button" onclick="toggleTag(this)" class="tag-btn px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+            On-Time Pickup
+          </button>
+          <button type="button" onclick="toggleTag(this)" class="tag-btn px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+            Clean Vehicle
+          </button>
+          <button type="button" onclick="toggleTag(this)" class="tag-btn px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+            Safe Driving
+          </button>
+        </div>
+      </div>
+
+      <!-- Optional Comment -->
+      <div>
+        <label for="rating-comment" class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Additional Comment (Optional)</label>
+        <textarea id="rating-comment" rows="3" placeholder="Safar ke baray mein apni raye likhein..."
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-900 bg-white focus:border-emerald-600"></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="button" onclick="submitRating()"
+        class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-sm shadow-lg shadow-emerald-600/20">
+        Submit Driver Rating
+      </button>
+
+      <!-- Confirmation Banner -->
+      <div id="rating-success-box" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-2">
+        <div class="font-bold text-sm" id="rating-success-title">Rating Submit Ho Gayi!</div>
+        <p id="rating-success-detail"></p>
+        <div class="pt-1 flex gap-2">
+          <a href="passenger.html" class="px-3.5 py-2 rounded-lg bg-emerald-600 text-white font-bold">Book Another Ride</a>
+          <a href="profile.html" class="px-3.5 py-2 rounded-lg bg-white border border-emerald-300 text-emerald-800 font-bold">View Profile</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    let selectedStars = 5;
+    const selectedTags = new Set();
+    const ratingDescriptions = {
+      1: '1 Star — Behtar nahi tha',
+      2: '2 Stars — Kaafi improvement ki zaroorat hai',
+      3: '3 Stars — Theek tha',
+      4: '4 Stars — Acha safar raha',
+      5: '5 Stars — Behtareen Safar'
+    };
+
+    function loadContext() {
+      const rides = JSON.parse(localStorage.getItem('safergo_rides') || '[]');
+      const lastRide = rides[0];
+      const ratings = JSON.parse(localStorage.getItem('safergo_driver_ratings') || '[]');
+
+      if (lastRide) {
+        document.getElementById('ride-summary-text').textContent =
+          `${lastRide.city} • ${lastRide.route} • Total: Rs ${lastRide.fare}`;
+      }
+
+      if (ratings.length > 0) {
+        const avg = (ratings.reduce((s, x) => s + x.stars, 0) / ratings.length).toFixed(1);
+        document.getElementById('avg-rating-badge').textContent = `★ ${avg} (${ratings.length})`;
+      }
+
+      selectStars(5);
+    }
+
+    function selectStars(count) {
+      selectedStars = count;
+      document.getElementById('rating-label').textContent = ratingDescriptions[count] || `${count} Stars`;
+      document.querySelectorAll('.star-btn').forEach(btn => {
+        const val = Number(btn.dataset.star);
+        btn.className = val <= count
+          ? 'star-btn text-4xl text-amber-400 transition-transform hover:scale-110'
+          : 'star-btn text-4xl text-slate-300 transition-transform hover:scale-110';
+      });
+    }
+
+    function toggleTag(btn) {
+      const label = btn.textContent.trim();
+      if (selectedTags.has(label)) {
+        selectedTags.delete(label);
+        btn.className = 'tag-btn px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700';
+      } else {
+        selectedTags.add(label);
+        btn.className = 'tag-btn px-3 py-1.5 rounded-full border-2 border-emerald-600 bg-emerald-50 text-xs font-bold text-emerald-800';
+      }
+    }
+
+    function submitRating() {
+      const comment = document.getElementById('rating-comment').value.trim();
+      const session = JSON.parse(localStorage.getItem('safergo_session') || '{"name":"Usman Tariq"}');
+      const ratings = JSON.parse(localStorage.getItem('safergo_driver_ratings') || '[]');
+
+      const entry = {
+        id: 'RT-' + Math.floor(1000 + Math.random() * 9000),
+        passenger: session.name || 'Passenger',
+        driver: document.getElementById('driver-name').textContent,
+        stars: selectedStars,
+        tags: Array.from(selectedTags),
+        comment,
+        date: new Date().toLocaleDateString()
+      };
+
+      ratings.unshift(entry);
+      localStorage.setItem('safergo_driver_ratings', JSON.stringify(ratings));
+
+      const avg = (ratings.reduce((s, x) => s + x.stars, 0) / ratings.length).toFixed(1);
+      document.getElementById('avg-rating-badge').textContent = `★ ${avg} (${ratings.length})`;
+
+      const box = document.getElementById('rating-success-box');
+      box.classList.remove('hidden');
+      document.getElementById('rating-success-title').textContent = `Shukriya! Aapne ${selectedStars}★ Rating Submit Ki`;
+      document.getElementById('rating-success-detail').textContent =
+        `Tags: ${entry.tags.length ? entry.tags.join(', ') : 'None'} ${comment ? '• "' + comment + '"' : ''}`;
+    }
+
+    loadContext();
+  </script>
+</body>
+</html>
